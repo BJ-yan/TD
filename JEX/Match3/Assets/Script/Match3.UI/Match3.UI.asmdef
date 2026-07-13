@@ -1,0 +1,16 @@
+{
+	"name": "Match3.UI",
+	"rootNamespace": "Match3.UI",
+	"references": [
+		"Match3.Gameplay",
+		"Match3.View"
+	],
+	"includePlatforms": [],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": false,
+	"precompiledReferences": [],
+	"autoReferenced": true,
+	"defineConstraints": [],
+	"versionDefines": []
+}
