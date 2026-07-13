@@ -24,6 +24,9 @@ namespace App.Internal
         private bool _isStarted;
         private int _achievedGoals;
         private LevelGoal<TGridSlot> _levelGoals;
+        protected IGameBoard<TGridSlot> GameBoard => _gameBoard;
+        public event EventHandler Finished;
+        public event EventHandler<LevelGoal<TGridSlot>> LevelGoalAchieved;
 
 		protected BaseGame(GameConfig<TGridSlot> config)
 		{
@@ -34,6 +37,17 @@ namespace App.Internal
             _gameBoardDataProvider = config.GameBoardDataProvider;
             _solvedSequencesConsumers = config.SolvedSequencesConsumers;
 		}
+
+        public void InitGameLevel(int level)
+        {
+            if (_isStarted)
+            {
+                throw new InvalidOperationException("Can not be initialized while the current game is active.");
+            }
+            
+            _gameBoard.SetGridSlots(_gameBoardDataProvider.GetGameBoardSlots(level));
+            _levelGoals = _levelGoalsProvider.GetLevelGoals(level, _gameBoard);
+        }
         
         public void Dispose()
         {
