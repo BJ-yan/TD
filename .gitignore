@@ -1,0 +1,29 @@
+﻿# Unity 生成的文件
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# IDE 相关文件
+.vs/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+
+# 构建产物
+*.apk
+*.aab
+*.unitypackage
+*.app
+TD/ProjectSettings
+TD/Temp
+TD/.idea
+TD/Library
+TD/Logs
+TD/obj
