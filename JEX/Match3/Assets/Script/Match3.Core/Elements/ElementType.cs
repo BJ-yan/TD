@@ -1,4 +1,4 @@
-namespace Match3.Core.Board
+namespace Match3.Core.Elements
 {
     /// <summary>
     /// 普通元素颜色。None 表示空格。

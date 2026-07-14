@@ -3,8 +3,8 @@ using Match3.Core.Elements;
 namespace Match3.Core.Board
 {
     /// <summary>
-    /// 棋盘单格，对标 Jex 五层 Cell（Hide / Bottom / Medium / Cover / Top）。
-    /// Medium 层在 Jex 中命名为 Resident。
+    /// 棋盘单格
+    /// 功能：单个格子的id位置、交互层级状态
     /// </summary>
     public class Cell
     {

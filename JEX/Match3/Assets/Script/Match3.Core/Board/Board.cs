@@ -5,7 +5,8 @@ using Match3.Core.Elements;
 namespace Match3.Core.Board
 {
     /// <summary>
-    /// 棋盘空间模型，对标 Jex Board（P-004 基础 API，LevelPart 集成在 W2）。
+    /// 棋盘空间模型
+    /// 功能：维护棋盘边界、棋盘内格子，交换格子
     /// </summary>
     public class Board
     {

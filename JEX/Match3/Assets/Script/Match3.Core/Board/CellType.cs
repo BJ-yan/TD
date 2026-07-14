@@ -1,7 +1,7 @@
 namespace Match3.Core.Board
 {
     /// <summary>
-    /// 格子类型，对标 Jex CellType。
+    /// 位置格子类型.
     /// </summary>
     public enum CellType
     {
