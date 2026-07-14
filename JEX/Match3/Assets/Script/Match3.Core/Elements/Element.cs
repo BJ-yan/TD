@@ -4,7 +4,8 @@ using Match3.Core.Board;
 namespace Match3.Core.Elements
 {
     /// <summary>
-    /// 棋盘元素抽象基类，对标 Jex Element（P-004 骨架，状态机与爆炸细节在 W2 补全）。
+    /// 棋盘元素抽象基类
+    /// 处理交换后的逻辑、特殊效果结算等
     /// </summary>
     public abstract class Element
     {
