@@ -1,4 +1,4 @@
-﻿namespace Match3.Core.Script.Match3.Core.Env
+﻿namespace Match3.Core.Env
 {
     /// <summary>
     /// 位域写入工具, 生成Element的身份号信息，在指定范围内写成指定内容

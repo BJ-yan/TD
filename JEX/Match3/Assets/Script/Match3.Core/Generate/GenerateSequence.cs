@@ -1,33 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
-using Match3.Core.Elements;
+using Match3.Core.Generate;
 
 namespace Match3.Core.Generate
 {
     public class GenerateSequence
     {
-        public List<GenerateOption> options;
+        public class Level
+        {
+            public LevelRandom Random { get; }
+            public Dictionary<int, int> ShuffleColorMap { get; } = new();
+            
+            /// <summary>typeId==0 时走随机色方案（通常挂 DefaultGenerateScheme）。</summary>
+            public GenerateScheme RandomColorGenerateScheme { get; set; }
+
+            public Level(int seed = 0)
+            {
+                Random = new LevelRandom(seed);
+            }
+        }
         
         /// <summary>
-        /// 对齐 Jex：totalWeight → RandRange → 递减权重命中。
-        /// allowed：本格允许的颜色（无三连候选）；null = 不限制。
-        /// 返回 None 表示抽失败。
+        /// 对齐 Jex Level.Random.RandRange；max 为开区间（同 System.Random.Next）。
         /// </summary>
-       public ElementType RequestOnce(Random rng, HashSet<ElementType> allowed = null)
+        public class LevelRandom
         {
-            // TODO 按你自己理解实现，对照伪码：
-            // total = 0
-            // foreach opt in Options:
-            //   if allowed != null && !allowed.Contains(opt.Type) continue
-            //   if opt.Weight <= 0 continue
-            //   total += opt.Weight
-            // if total == 0 return None
-            // r = rng.Next(1, total + 1)   // 与 Jex RandRange(1, total+1) 同语义
-            // foreach opt (同样过滤):
-            //   r -= opt.Weight
-            //   if r <= 0 return opt.Type
-            // return None
-            throw new NotImplementedException();
+            private readonly Random _rng;
+            public LevelRandom(int seed) => _rng = new Random(seed);
+            public int RandRange(int minInclusive, int maxExclusive) =>
+                _rng.Next(minInclusive, maxExclusive);
         }
     }
 }

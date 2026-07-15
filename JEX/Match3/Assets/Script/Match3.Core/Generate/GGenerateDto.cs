@@ -3,7 +3,8 @@ using System.IO;
 namespace Match3.Core.Generate
 {
     /// <summary>
-    /// 生成关卡Scheme的
+    /// 运行时对应GenerateOption，
+    /// 存储typeId、value、weight
     /// </summary>
     public class GOption
     {
@@ -23,6 +24,11 @@ namespace Match3.Core.Generate
             weight = reader.ReadInt32();
         }
     }
+    
+    /// <summary>
+    /// 运行时对应GenerateSequence，
+    /// 存储一组GOPtion
+    /// </summary>
     [Serializable]
     public class GSequence
     {
@@ -44,6 +50,11 @@ namespace Match3.Core.Generate
             }
         }
     }
+    
+    /// <summary>
+    /// 运行时对应GenerateScheme，
+    /// 存储一组 id、次数、Min/Max、条件、GSequence[] 等
+    /// </summary>
     [Serializable]
     public class GScheme
     {

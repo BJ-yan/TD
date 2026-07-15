@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Match3.Core.Elements;
 using Match3.Core.Board;
 
 namespace Match3.Core.Generate
