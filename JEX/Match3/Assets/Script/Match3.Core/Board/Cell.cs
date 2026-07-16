@@ -8,12 +8,12 @@ namespace Match3.Core.Board
     /// </summary>
     public class Cell
     {
-        private Element _hide;
-        private Element _bottom;
-        private Element _resident;
-        private Element _cover;
-        private Element _top;
-        private Element _surface;
+        private ElementBase _hide;
+        private ElementBase _bottom;
+        private ElementBase _resident;
+        private ElementBase _cover;
+        private ElementBase _top;
+        private ElementBase _surface;
         private bool _surfaceDirty = true;
         private int _surfaceLayer = -1;
 
@@ -34,38 +34,38 @@ namespace Match3.Core.Board
 
         public Board Board { get; private set; }
 
-        public Element Hide
+        public ElementBase Hide
         {
             get => _hide;
             set => SetLayer(ref _hide, value, ElementLayer.Hide);
         }
 
-        public Element Bottom
+        public ElementBase Bottom
         {
             get => _bottom;
             set => SetLayer(ref _bottom, value, ElementLayer.Bottom);
         }
 
         /// <summary>主交互层，对标 Jex Resident。</summary>
-        public Element Resident
+        public ElementBase Resident
         {
             get => _resident;
             set => SetLayer(ref _resident, value, ElementLayer.Medium);
         }
 
-        public Element Cover
+        public ElementBase Cover
         {
             get => _cover;
             set => SetLayer(ref _cover, value, ElementLayer.Cover);
         }
 
-        public Element Top
+        public ElementBase Top
         {
             get => _top;
             set => SetLayer(ref _top, value, ElementLayer.Top);
         }
 
-        public Element Surface
+        public ElementBase Surface
         {
             get
             {
@@ -107,9 +107,9 @@ namespace Match3.Core.Board
 
         public bool IsEmpty => Resident == null && Cover == null && Top == null;
 
-        public Element QueryElement(ElementLayer layer) => QueryElement((int)layer);
+        public ElementBase QueryElement(ElementLayer layer) => QueryElement((int)layer);
 
-        public Element QueryElement(int layerIndex)
+        public ElementBase QueryElement(int layerIndex)
         {
             return layerIndex switch
             {
@@ -122,7 +122,7 @@ namespace Match3.Core.Board
             };
         }
 
-        public void SetElement(ElementLayer layer, Element element)
+        public void SetElement(ElementLayer layer, ElementBase element)
         {
             switch (layer)
             {
@@ -182,7 +182,7 @@ namespace Match3.Core.Board
             return successHit;
         }
 
-        private void SetLayer(ref Element field, Element value, ElementLayer layer)
+        private void SetLayer(ref ElementBase field, ElementBase value, ElementLayer layer)
         {
             if (field == value)
                 return;

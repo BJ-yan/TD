@@ -7,12 +7,13 @@ namespace Match3.Core.Elements
     /// 棋盘元素抽象基类
     /// 处理交换后的逻辑、特殊效果结算等
     /// </summary>
-    public abstract class Element
+    public abstract class ElementBase
     {
         private static int _sNextId = 1;
         private readonly HashSet<string> _unstableFactors = new();
 
         public int Id { get; } = _sNextId++;
+        public int TypeId => (int)Type;
         public Cell StayedCell { get; private set; }
         public ElementState CurrentState { get; private set; } = ElementState.Idle;
 
@@ -46,6 +47,19 @@ namespace Match3.Core.Elements
         {
             CurrentState = state;
         }
+        
+        /// <summary>
+        /// 供 CreateParam.life
+        /// </summary>
+        public void SetLife(int life)
+        {
+            Life = life;
+        }
+        
+        public virtual void CalibratePosition(GridPos pos)
+        {
+        }
+
 
         public void AddUnstableFactor(string reason)
         {

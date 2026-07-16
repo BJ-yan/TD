@@ -2,7 +2,7 @@
     
 namespace Match3.Core.Elements
 {
-    public class BasicElement : Element
+    public class ColorElement : ElementBase
     {
         private readonly ElementType _elementType;
 

@@ -1,108 +1,159 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using Match3.Core.Env;
 using Match3.Core.Level;
 
 namespace Match3.Core.Generate
 {
+    /// <summary>
+    /// 生成方案：可含多个 Sequence，并带总数/轮转/MinMax 等门控字段。
+    /// 抽签本身在 Sequence.GenerateInner；这里只转发当前 SequenceIndex。
+    /// </summary>
     public class GenerateScheme : IGenerateConfig
     {
-        public List<GenerateOption> Options { get; set; }
-        public int ClassTypeId { get; } = (int) EGenerateConfigType.GenerateScheme;
+       public List<GenerateSequence> Sequence  { get; set; }
+       
+       public int Id { get; set; }
+       public bool IsClone { get; set; }
+       public bool IsActive { get; set; }
 
-        private LevelBase m_Level;
-        
-        public void SetLevel(LevelBase level)
-        {
-            m_Level = level;
-        }
-        
-        public void Deserialize(GSequence sequence)
-        {
-            Options = new List<GenerateOption>();
-            foreach (var goption in sequence.options)
-            {
-                var option = new GenerateOption(); // Jex: Pool.GetResuableGenerateOption()
-                option.Deserialize(goption);
-                Options.Add(option);
-            }
-        }
-        
-        public void Serialize(BinaryWriter writer)
-        {
-            var optionsCount = Options.Count;
-            writer.Write(optionsCount);
-            for (var i = 0; i < optionsCount; i++)
-                Options[i].Serialize(writer);
-        }
-        
-        public void Deserialize(BinaryReader reader)
-        {
-            Options = new List<GenerateOption>();
-            var optionsCount = reader.ReadInt32();
-            for (var i = 0; i < optionsCount; i++)
-            {
-                var option = new GenerateOption();
-                option.Deserialize(reader);
-                Options.Add(option);
-            }
-        }
+       public int TotalCount { get; set; }
+       public int GenerateCount { get; set; }
+       public int Round { get; set; }
+       public int SequenceIndex { get; set; }
+       public int RoundGap { get; set; }
+       public int MinCount { get; set; }
+       public int MaxCount { get; set; }
+       public bool IsShare { get; set; }
+       public int[] ConditionIds { get; set; }
+       public int Priority { get; set; }
+       
+       public int ClassTypeId { get; } = (int)EGenerateConfigType.GenerateScheme;
+       
+       private LevelBase m_Level;
 
-        /// <summary>
-        /// 假设Options是：
-        /// A typeId = 1（红）  weight = 10
-        /// B typeId = 2（蓝）  weight = 30
-        /// C typeId = 0 （随机）weight = 60
-        ///
-        /// total weight = 100
-        ///
-        /// |---- 红 10 ----|-------- 蓝 30 --------|-------------- C 60 --------------|
-        /// 应用进来实现权重抽选option
-        /// </summary>
-        /// <param name="modifier"></param>
-        /// <returns></returns>
-        long GenerateInner(IGenerateDynamicModifier modifier)
-        {
-            // 每次重算权重（后续难度调控可能改 generateWeight）
-            var totalWeight = 0;
+       public void SetLevel(LevelBase level)
+       {
+           m_Level = level;
+           if (Sequence == null) return;
+           for (var i = 0; i < Sequence.Count; i++)
+               Sequence[i].SetLevel(level);
+       }
+       
+       public virtual long RequestOnceGenerate(IGenerateDynamicModifier modifier)
+       {
+           if (Sequence == null || Sequence.Count == 0) return -1;
 
-            foreach (var option in Options)
-                totalWeight += option.generateWeight;
-            
-            var randomWeight = m_Level.Random.RandRange(1, totalWeight + 1);
-            foreach (var option in Options)
-            {
-                randomWeight -= option.generateWeight;
-                if (randomWeight > 0)
-                    continue;
+           var currentSequence = Sequence[SequenceIndex];
 
-                var typeId = option.elementTypeId;
-                if (typeId == 0)
-                {
-                    // 随机色方案（带 Modifier）
-                    return m_Level.RandomColorGenerateScheme.RequestOnceGenerate(modifier);
-                }
+           if (currentSequence == null) return -1;
+           return currentSequence.RequestOnceGenerate(modifier);
+       }
+       
+#region Storage
+       
+       public void Serialize(BinaryWriter writer, bool containSequence = false)
+       {
+           writer.Write(Id);
+           writer.Write(IsClone);
+           writer.Write(IsActive);
+           writer.Write(IsShare);
+           writer.Write(TotalCount);
+           writer.Write(GenerateCount);
+           writer.Write(SequenceIndex);
+           writer.Write(Round);
+           writer.Write(RoundGap);
+           writer.Write(MinCount);
+           writer.Write(MaxCount);
+           writer.Write(Priority);
+           
+           var length = ConditionIds?.Length ?? 0;
+           writer.Write(length);
 
-                typeId = m_Level.ShuffleColorMap.GetValueOrDefault(typeId, typeId);
-                return LevelUtil.Modify(option.value, 18, 14, typeId);
-            }
+           for (var i = 0; i < length; i++)
+               writer.Write(ConditionIds[i]);
 
-            return -1;
-        }
-        
-        public long RequestOnceGenerate(IGenerateDynamicModifier modifier)
-        {
-            var result = GenerateInner(modifier);
-            if (result < 0) return -1;
-            return result;
-        }
-        
-        public void Clear()
-        {
-            if (Options == null) return;
-            foreach (var option in Options)
-                option.Clear();
-            Options.Clear();
-        }
+           if (!containSequence) return;
+
+           var sequenceCount = Sequence.Count;
+           writer.Write(sequenceCount);
+
+           for (var i = 0; i < sequenceCount; i++)
+               Sequence[i].Serialize(writer);
+       }
+       
+       public void Deserialize(GScheme scheme)
+       {
+           Id = scheme.id;
+           IsClone = false;
+           IsActive = scheme.isActive;
+           IsShare = scheme.isShare;
+           TotalCount = scheme.totalCount;
+           GenerateCount = scheme.generateCount;
+           SequenceIndex = 0;
+           Round = 0;
+           RoundGap = scheme.roundGap;
+           MinCount = scheme.minCount;
+           MaxCount = scheme.maxCount;
+           var conditionIdLength = scheme.conditionIds?.Length ?? 0;
+           ConditionIds = new int[conditionIdLength];
+           for (var i = 0; i < conditionIdLength; i++)
+               ConditionIds[i] = scheme.conditionIds[i];
+           Sequence = new List<GenerateSequence>();
+           foreach (var gsequence in scheme.sequences)
+           {
+               var sequence = new GenerateSequence();
+               sequence.SetLevel(m_Level);
+               sequence.Deserialize(gsequence);
+               Sequence.Add(sequence);
+           }
+       }
+       
+       public virtual GenerateScheme Clone()
+       {
+           // Jex: Pool.GetResuableGenerateScheme()；Demo 用 new
+           var clone = new GenerateScheme();
+           clone.SetLevel(m_Level);
+           clone.Id = Id;
+           clone.IsClone = true;
+           clone.Sequence = Sequence; // 共享 Sequence 列表（与 Jex 一致）
+           clone.IsActive = IsActive;
+           clone.IsShare = IsShare;
+           clone.TotalCount = TotalCount;
+           clone.GenerateCount = GenerateCount;
+           clone.RoundGap = RoundGap;
+           clone.MinCount = MinCount;
+           clone.MaxCount = MaxCount;
+           clone.Priority = Priority;
+           clone.ConditionIds = new int[ConditionIds.Length];
+           for (var i = 0; i < ConditionIds.Length; i++)
+               clone.ConditionIds[i] = ConditionIds[i];
+           return clone;
+       }
+       
+       public virtual void Clear()
+       {
+           if (!IsClone && Sequence != null)
+           {
+               foreach (var sequence in Sequence)
+                   sequence.Clear();
+               Sequence.Clear();
+           }
+           Sequence = null;
+           Id = 0;
+           IsClone = false;
+           IsActive = false;
+           TotalCount = 0;
+           GenerateCount = 0;
+           Round = 0;
+           SequenceIndex = 0;
+           RoundGap = 0;
+           MinCount = 0;
+           MaxCount = 0;
+           IsShare = false;
+           ConditionIds = Array.Empty<int>();
+           m_Level = null;
+       }
+#endregion
     }
 }

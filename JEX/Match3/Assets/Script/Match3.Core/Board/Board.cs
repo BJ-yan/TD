@@ -88,5 +88,22 @@ namespace Match3.Core.Board
                     yield return cell;
             }
         }
+
+        /// <summary>
+        /// 统计 Resident 层指定 typeId 的数量。
+        /// ElementStorage 用它做 Scheme 的 MinCount / MaxCount 门控（对齐 Jex Board.GetElementCount）。
+        /// </summary>
+        public int GetElementCount(int typeId)
+        {
+            var count = 0;
+            for (var x =0; x < Cols; x++)
+            for (var y = 0; y < Rows; y++)
+            {
+                var cell = _cells[y, x];
+                if (cell?.Resident != null && (int)cell.Resident.TypeId == typeId)
+                    count++;
+            }
+            return count;
+        }
     }
 }
